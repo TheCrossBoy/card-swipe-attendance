@@ -1,2 +1,35 @@
-SAVE_LOCATION="./Attendance"
+import os
+import re
+import time
 
+SAVE_LOCATION="./Attendance/"
+EXTENSION=".csv"
+COLUMNS="Timestamp,ID\n"
+
+file_name = input(f"Enter the name of the file to save or modify: {SAVE_LOCATION}")
+full_path = SAVE_LOCATION + file_name + EXTENSION
+
+if not os.path.isfile(full_path):
+	print("! No existing file found, creating a new one.")
+	f = open(full_path, "w")
+	f.write(COLUMNS)
+else:
+	print("! Existing file found, appending to it.")
+	f = open(full_path, "a")
+
+print("===================")
+
+while True:
+	# ;09160198161404100000000000000000000?
+	inp = input("> ")
+	if match := re.search(';(\d*)\?', inp):
+		extracted_id = match.group(1)
+	else:
+		print("Input doesn't match ID, ending check-in.")
+		break
+
+	f.write(f"{time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())},{extracted_id}\n")
+	f.flush()
+	print(f"Checked in {extracted_id}")
+
+f.close()
