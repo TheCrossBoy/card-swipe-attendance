@@ -24,12 +24,18 @@ while True:
 	inp = input("> ")
 	if match := re.search(';(\d*)\?', inp):
 		extracted_id = match.group(1)
+		f.write(f"{time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())},{extracted_id}\n")
+		f.flush()
+		print(f"Checked in {extracted_id}")
+	elif match := re.search('@(.*)', inp):
+		extracted = match.group(1)
+		f.write(f"{time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())},{extracted}\n")
+		f.flush()
+		print(f"Manual entry checked in {extracted}")
 	else:
 		print("Input doesn't match ID, ending check-in.")
 		break
 
-	f.write(f"{time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())},{extracted_id}\n")
-	f.flush()
-	print(f"Checked in {extracted_id}")
+	
 
 f.close()
