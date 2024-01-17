@@ -22,8 +22,13 @@ print("===================")
 while True:
 	# ;09160198161404100000000000000000000?
 	inp = input("> ")
-	if match := re.search(';(\d*)\?', inp):
-		extracted_id = match.group(1)
+	if match := re.search(';(\\d\\d)(\\d\\d\\d\\d\\d\\d\\d\\d)(\\d*)\\?', inp):
+		extracted_zone = match.group(1)
+		if extracted_zone == "09":
+			extracted_id = "A" + match.group(2)
+		else:
+			extracted_id = match.group(1) + match.group(2) + match.group(3)
+		
 		f.write(f"{time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())},{extracted_id}\n")
 		f.flush()
 		print(f"Checked in {extracted_id}")
@@ -36,6 +41,5 @@ while True:
 		print("Input doesn't match ID, ending check-in.")
 		break
 
-	
 
 f.close()
