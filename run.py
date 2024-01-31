@@ -47,7 +47,7 @@ while True:
 			extracted_id = "A" + match.group(2)
 		else:
 			extracted_id = match.group(1) + match.group(2) + match.group(3)
-		
+		pid = extracted_id
 		f.write(f"{time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())},{extracted_id}\n")
 		f.flush()
 		print(f"Checked in {extracted_id}")
@@ -60,8 +60,15 @@ while True:
 		extracted = match.group(1)
 		f.write(f"{time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())},{extracted}\n")
 		f.flush()
-		print(f"Manual entry checked in {extracted}")
-		continue
+
+		try:
+			pid = gradebook.loc[gradebook['SIS Login ID'] == extracted, 'SIS User ID'].item()
+			print(f"Manual entry checked in {extracted} ({pid})")
+		except:
+			print(f"Manual entry checked in {extracted}, but couldn't find PID.")
+			continue
+		
+		
 	elif match := re.search('\\*(\\d*\\.?\\d*)$', inp):
 		score = float(match.group(1))
 		print(f"Score now {score}")
