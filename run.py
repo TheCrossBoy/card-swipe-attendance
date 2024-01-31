@@ -1,12 +1,16 @@
 import os
 import re
 import time
+import pandas as pd
 
 SAVE_LOCATION="./Attendance/"
 EXTENSION=".csv"
 COLUMNS="Timestamp,ID\n"
+GRADEBOOK_NAME="Gradebook.csv"
+DEFAULT_SCORE = 2.0
 
-file_name = input(f"Enter the name of the file to save or modify: {SAVE_LOCATION}")
+week_num = input(f"What week would you like to enter attendance for? ")
+file_name = "Week" + week_num + "Attendance"
 full_path = SAVE_LOCATION + file_name + EXTENSION
 
 if not os.path.isfile(full_path):
@@ -17,11 +21,26 @@ else:
 	print("! Existing file found, appending to it.")
 	f = open(full_path, "a")
 
-print("===================")
+gradebook = None
+if os.path.isfile(GRADEBOOK_NAME):
+	gradebook = pd.read_csv(GRADEBOOK_NAME)
+	col_raw = f"Week {week_num} Attendance"
+	cols = [col for col in gradebook.columns if col_raw in col]
+	print(cols)
+	if len(cols) == 0:
+		print(f"ERROR, {col_raw} NOT FOUND")
+		gradebook = None
+	else:
+		col = cols[0]
+		print(f"! Loaded gradebook {GRADEBOOK_NAME} on {col}")
+	# print(gradebook)
 
+print("===================")
+score = DEFAULT_SCORE
 while True:
 	# ;09160198161404100000000000000000000?
 	inp = input("> ")
+	pid = ""
 	if match := re.search(';(\\d\\d)(\\d\\d\\d\\d\\d\\d\\d\\d)(\\d*)\\?', inp):
 		extracted_zone = match.group(1)
 		if extracted_zone == "09":
@@ -32,14 +51,32 @@ while True:
 		f.write(f"{time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())},{extracted_id}\n")
 		f.flush()
 		print(f"Checked in {extracted_id}")
+	elif match := re.search('(A\\d\\d\\d\\d\\d\\d\\d\\d)', inp):
+		pid = match.group(1)
+		f.write(f"{time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())},{pid}\n")
+		f.flush()
+		print(f"Checked in manually entered PID {pid}")
 	elif match := re.search('@(.*)', inp):
 		extracted = match.group(1)
 		f.write(f"{time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())},{extracted}\n")
 		f.flush()
 		print(f"Manual entry checked in {extracted}")
+		continue
+	elif match := re.search('\\*(\\d*\\.?\\d*)$', inp):
+		score = float(match.group(1))
+		print(f"Score now {score}")
+		continue
 	else:
 		print("Input doesn't match ID, ending check-in.")
 		break
+	
+	if gradebook is not None:
+		try:
+			gradebook.loc[gradebook['SIS User ID'] == pid, col] = score
+			gradebook.to_csv(GRADEBOOK_NAME, index=False)
+			print(f"Added gradebook entry for {gradebook.loc[gradebook['SIS User ID'] == pid, 'Student'].item()}")
+		except:
+			print(f"Couldn't find row for {pid}!")
 
 
 f.close()
