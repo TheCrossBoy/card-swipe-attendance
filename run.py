@@ -40,7 +40,7 @@ score = DEFAULT_SCORE
 while True:
 	# ;09160198161404100000000000000000000?
 	inp = input("> ")
-	pid = ""
+	pid = None
 	if match := re.search(';(\\d\\d)(\\d\\d\\d\\d\\d\\d\\d\\d)(\\d*)\\?', inp):
 		extracted_zone = match.group(1)
 		if extracted_zone == "09":
@@ -77,7 +77,7 @@ while True:
 		print("Input doesn't match ID, ending check-in.")
 		break
 	
-	if gradebook is not None:
+	if gradebook is not None and pid is not None:
 		try:
 			gradebook.loc[gradebook['SIS User ID'] == pid, col] = score
 			gradebook.to_csv(GRADEBOOK_NAME, index=False)
