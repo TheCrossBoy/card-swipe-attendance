@@ -5,9 +5,10 @@ import pandas as pd
 
 SAVE_LOCATION="./Attendance/"
 EXTENSION=".csv"
-COLUMNS="Timestamp,ID\n"
 GRADEBOOK_NAME="Gradebook.csv"
+COLUMN_NAME="Week %s Lecture"
 DEFAULT_SCORE = 2.0
+
 
 week_num = input(f"What week would you like to enter attendance for? ")
 file_name = "Week" + week_num + "Attendance"
@@ -16,7 +17,7 @@ full_path = SAVE_LOCATION + file_name + EXTENSION
 if not os.path.isfile(full_path):
 	print("! No existing file found, creating a new one.")
 	f = open(full_path, "w")
-	f.write(COLUMNS)
+	f.write("Timestamp,ID\n")
 else:
 	print("! Existing file found, appending to it.")
 	f = open(full_path, "a")
@@ -24,15 +25,14 @@ else:
 gradebook = None
 if os.path.isfile(GRADEBOOK_NAME):
 	gradebook = pd.read_csv(GRADEBOOK_NAME)
-	col_raw = f"Week {week_num} Attendance"
+	col_raw = COLUMN_NAME % week_num
 	cols = [col for col in gradebook.columns if col_raw in col]
-	print(cols)
 	if len(cols) == 0:
 		print(f"ERROR, {col_raw} NOT FOUND")
 		gradebook = None
 	else:
 		col = cols[0]
-		print(f"! Loaded gradebook {GRADEBOOK_NAME} on {col}")
+		print(f"! Loaded {GRADEBOOK_NAME} for assignment '{col}'")
 	# print(gradebook)
 
 print("===================")
